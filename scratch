@@ -1,0 +1,84 @@
+
+
+
+
+var found = false;
+params = [];
+
+process.argv.forEach(function(a,i){
+  if(found){
+    params.push(a);
+  }
+  if(a.search(/getcelebs/) >= 0){
+    found = true;
+  }
+});
+if(params.length != 2){
+  console.log("Usage:");
+  console.log("   getcelebs <key> <secret>");
+  process.exit();
+}
+
+var bearertoken = params[0] + ":" + params[1];
+var bearertokenBase64 = new Buffer(bearertoken).toString('base64')
+
+
+
+
+
+
+
+process.exit();
+
+
+//console.log(bearertokenBase64);
+
+var post_data = 'grant_type=client_credentials';
+/*
+POST /oauth2/token HTTP/1.1
+Host: api.twitter.com
+User-Agent: My Twitter App v1.0.23
+Authorization: Basic eHZ6MWV2RlM0d0VFUFRHRUZQSEJvZzpMOHFxOVBaeVJnNmllS0dFS2hab2xHQzB2SldMdzhpRUo4OERSZHlPZw==
+Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+Content-Length: 29
+Accept-Encoding: gzip
+
+grant_type=client_credentials
+*/
+
+var post_options = {
+  method: 'POST',
+  hostname: 'api.twitter.com',
+  port: 443,
+  path: '/oauth2/token',
+  //authorization: 'Basic ' + bearertokenBase64,
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    'Content-Length': Buffer.byteLength(post_data),
+    'Accept-Encoding': 'gzip'
+  }
+}
+
+post_options = {
+  hostname: 'api.twitter.com',
+  port: 443,
+  path: '/oauth2/token',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    'Content-Length': Buffer.byteLength(post_data),
+  }
+};
+
+console.log(post_options);
+var post_req = http.request(post_options, function(res){
+  console.log(`STATUS: ${res.statusCode}`);
+  console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+  res.setEncoding('utf8');
+  res.on('data', function(chunk){
+    console.log("Response: + chunk");
+  });
+});
+
+post_req.write(post_data);
+post_req.end();

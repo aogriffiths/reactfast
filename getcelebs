@@ -1,0 +1,115 @@
+#!/usr/bin/env node
+var https = require("https");
+var longjohn = require('longjohn');
+
+var Twitter = require('twitter');
+var Promise = require('bluebird');
+
+var http = require('http');
+var fs = require('fs');
+
+var twitterClient = new Twitter({
+  consumer_key: '04nGT4oJwi6A4PKa7CgFXkE9X',
+  consumer_secret: 'tADxXQJ20vAfcJDeRTgGbVJe8O761u7Svijj6v0zIYgjV71zIx',
+  bearer_token: 'AAAAAAAAAAAAAAAAAAAAAKjpxgAAAAAAZMOKOKTQm7Ia3vPqgweJI1NUogw%3DItulzjWyZlZGz9dMZbwx5xTRz2hnaph2FnbwaUmRKPlc1uTZqY'
+});
+
+function twitterActorsActressesAsync() {
+  return new Promise(function(resolve, reject){
+    twitterClient.get('users/suggestions/actors-actresses.json',{},function(error, data){
+      resolve(data);
+    });
+  });
+}
+
+function twitterUsersAsync(user_id) {
+  return new Promise(function(resolve, reject){
+    twitterClient.get('users/show.json',{'user_id':user_id},function(error, data){
+      resolve(data);
+    });
+  });
+}
+
+//client.get('users/show.json?user_id=166739404', params, data_callback);
+
+
+twitterActorsActressesAsync()
+  .then(function(data){
+    wf(data);
+    return data.users;
+  }).map(function(user){
+    return twitterUsersAsync(user.id);
+  }).map(function(user){
+    console.log("------");
+    console.log(user.name);
+    console.log(user.profile_image_url_https);
+    console.log(user.profile_banner_url);
+    console.log(user.description);
+    console.log(user.status.text);
+    var img = user.profile_image_url_https.replace("_normal","")
+    dl(img, user.id + "_profile.jpg");
+    var img2 = user.profile_banner_url
+    dl(img2, user.id + "_banner.jpg");
+    return "done";
+  })
+
+function dl(url, name){
+  var file = fs.createWriteStream(name);
+  var request = https.get(url, function(response) {
+    response.pipe(file);
+  });
+}
+
+function wf(obj){
+  var val = JSON.stringify(obj);
+  console.log("writing file");
+  fs.writeFile("list.json", val, function(err) {
+      if(err) {
+          return console.log(err);
+      }
+      console.log("The file was saved!");
+  });
+}
+/*
+  var file = fs.createWriteStream("file.jpg");
+  var request = http.get("http://i3.ytimg.com/vi/J---aiyznGQ/mqdefault.jpg", function(response) {
+    response.pipe(file);
+  });
+*/
+
+//var get = Promise.promisify(twitterClient.get);
+//console.log("A");
+//console.log(get);
+//var getB = Promise.bind(get, twitterClient);
+//console.log("B");
+//console.log(getB);
+//var params = {screen_name: 'nodejs'};
+//console.log("C");
+//
+//getB('users/suggestions/actors-actresses.json', params)
+//  .then(function(data){
+//
+//  });
+
+//function(error, tweets, response) {
+//  if (!error) {
+//    console.log(tweets);
+//  }
+//});
+
+//console.log("B");
+//
+// var get = Promise.bind(twitterClient.get, twitterClient);
+//
+// var get2 = Promise.promisify(get);
+//
+// get2('users/suggestions/actors-actresses.json', params)
+//   .then(function(data){
+//     console.log(data);
+//   })
+//
+//
+
+//client.get('users/suggestions/actors-actresses.json', params, data_callback);
+
+//client.get('users/show.json?user_id=166739404', params, data_callback);
