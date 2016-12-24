@@ -251,7 +251,7 @@ Congratulations, you just fixed a bug! Now Let's make the mini profile look a li
 
 ```js
 <div className="miniprofile">
-	<div className="avatar" style={{backgroundImage: "url(" + (user.profileImg || "") + ")"}}></div>
+	<div className="avatar" style={{backgroundImage: "url(" + (user.profileImg || "https://github.com/aogriffiths/reactfast/raw/master/userprofile.png") + ")"}}></div>
 	<h1 className="name">{user.name || "Name"}</h1>
 	<h2 className="tagline">{user.tagline || "Tagline"}</h2>
 </div>
